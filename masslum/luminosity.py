@@ -4,13 +4,22 @@ from masslum.utils import rejection_sampler
 
 # Same parameters as Gray et al (2019)
 alpha = -1.07
-L0    = 3.0128*1e28
 Lsun  = 3.8*1e26
-Lstar = 1.2*(1e10)*Lsun/(omega.h**2)
+L0    = 3.0128*1e28/Lsun
+Lstar = 1.2*(1e10)/(omega.h**2)
 Llow  = 0.001*Lstar
 Lhigh = 10*Lstar
-mth   = 19.5
-zmax  = 0.4
+mth   = 18
+zmax  = 0.5
+gal_density = 1./1000000 #gal/Mpc^3
+
+# Mass-luminosity relation from Ding et al (2020) – https://arxiv.org/pdf/1910.11875
+# log(M/10^7 Msun) = 0.49 + 0.90 log(L/10^10 Lsun)
+a_ding = 0.90
+b_ding = 0.49
+
+def mass_luminosity_relation(L, a, b):
+    return np.exp(b + a*np.log(L*1e-10))*1e7
 
 def schechter_unnorm(L):
     return ((L/Lstar)**alpha)*np.exp(-L/Lstar)/Lstar
@@ -40,22 +49,43 @@ def selection_function(x):
     m  = apparent_magnitude(x[:,0], DL)
     return m < mth
 
-def sample_catalog(n_galaxies = 1):
-    L  = rejection_sampler(n_galaxies, schechter, [Llow,Lhigh])
-    z  = rejection_sampler(n_galaxies, redshift_distribution, [0,zmax])
-    DL = omega.LuminosityDistance(z)
-    m  = apparent_magnitude(L, DL)
-    return np.array([L/Lsun, z, DL, m]).T[m<mth]
-
-
+def sample_catalog(n_galaxies = 1, select = False):
+    L   = rejection_sampler(n_galaxies, schechter, [Llow,Lhigh])
+    M   = mass_luminosity_relation(L, a_ding, b_ding)
+    z   = rejection_sampler(n_galaxies, redshift_distribution, [0,zmax])
+    dz  = z*0.05
+    DL  = omega.LuminosityDistance(z)
+    m   = apparent_magnitude(L, DL)
+    ra  = np.random.uniform(0,2*np.pi,n_galaxies)
+    dec = np.arccos(np.random.uniform(-1,1,n_galaxies)) - np.pi/2.
+    cat = np.array([L, m, M, ra, dec, z, DL, dz]).T
+    if select:
+        return cat[m<mth]
+    else:
+        return cat
 
 if __name__ == '__main__':
 
     from corner import corner
     from figaro import plot_settings
-    cat = sample_catalog(50000)
     
-    fig = corner(cat, labels = ['$\\mathrm{L}\ [\\mathrm{L}_\\odot]$', '$z$', '$\\mathrm{D_L}\ [\\mathrm{Mpc}]$','$m$'])
-    fig.savefig('full_catalog.pdf', bbox_inches = 'tight')
-    fig = corner(cat[cat[:,3]<mth], labels = ['$\\mathrm{L}\ [\\mathrm{L}_\\odot]$', '$z$', '$\\mathrm{D_L}\ [\\mathrm{Mpc}]$','$m$'])
-    fig.savefig('observed_catalog.pdf', bbox_inches = 'tight')
+    n_evs = 1000
+    ngal  = int(omega.ComovingVolume(zmax)*gal_density)
+    cat   = sample_catalog(ngal)
+    hosts = cat[np.random.randint(ngal, size = n_evs)]
+    
+    np.savetxt(f'simulated_data/catalog_mth_{mth}.txt', cat[cat[:,1]<mth], header = 'L m M ra dec z DL')
+    np.savetxt(f'simulated_data/hosts_mth_{mth}.txt', hosts, header = 'L m M ra dec z DL')
+    
+    hosts[:,2] = np.log10(hosts[:,2])
+    cat[:,2] = np.log10(cat[:,2])
+    hosts[:,0] = np.log10(hosts[:,0])
+    cat[:,0] = np.log10(cat[:,0])
+    
+    fig = corner(cat[cat[:,1]<mth][:,:-1], labels = ['$\\log\\mathrm{L}/\\mathrm{L}_\\odot$', '$m$','$\\log\\mathrm{M}/\\mathrm{M}_\\odot$', '$\\alpha$', '$\\delta$', '$z$', '$\\mathrm{D_L}\ [\\mathrm{Mpc}]$'])
+    fig.savefig(f'simulated_data/observed_catalog_mth_{mth}.pdf', bbox_inches = 'tight')
+
+    fig = corner(hosts[:,:-1], labels = ['$\\log\\mathrm{L}/\\mathrm{L}_\\odot$', '$m$','$\\log\\mathrm{M}/\\mathrm{M}_\\odot$', '$\\alpha$', '$\\delta$', '$z$', '$\\mathrm{D_L}\ [\\mathrm{Mpc}]$'])
+    fig.savefig(f'simulated_data/potential_hosts_mth_{mth}.pdf', bbox_inches = 'tight')
+    
+    
