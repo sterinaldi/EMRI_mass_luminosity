@@ -9,9 +9,9 @@ L0    = 3.0128*1e28/Lsun
 Lstar = 1.2*(1e10)/(omega.h**2)
 Llow  = 0.001*Lstar
 Lhigh = 10*Lstar
-mth   = 18
-zmax  = 0.5
-gal_density = 1./1000000 #gal/Mpc^3
+mth   = 19
+zmax  = 0.3
+gal_density = 1./10000000 #gal/Mpc^3
 
 # Mass-luminosity relation from Ding et al (2020) – https://arxiv.org/pdf/1910.11875
 # log(M/10^7 Msun) = 0.49 + 0.90 log(L/10^10 Lsun)
@@ -20,6 +20,9 @@ b_ding = 0.49
 
 def mass_luminosity_relation(L, a, b):
     return np.exp(b + a*np.log(L*1e-10))*1e7
+
+def mass_luminosity_inverse_relation(M, a, b):
+    return np.exp((np.log(M*1e-7)-b)/a)*1e10
 
 def schechter_unnorm(L):
     return ((L/Lstar)**alpha)*np.exp(-L/Lstar)/Lstar
@@ -37,6 +40,9 @@ norm_z = np.sum(redshift_distribution_unnorm(z_norm)*dz)
 
 def schechter(L):
     return ((L/Lstar)**alpha)*np.exp(-L/Lstar)/(Lstar*norm_schechter)
+
+def log_schechter(L):
+    return alpha*np.log(L/Lstar) -L/Lstar - np.log(Lstar) -np.log(norm_schechter)
 
 def redshift_distribution(z):
     return omega.ComovingVolumeElement(z)/((1+z)*norm_z)
@@ -74,8 +80,8 @@ if __name__ == '__main__':
     cat   = sample_catalog(ngal)
     hosts = cat[np.random.randint(ngal, size = n_evs)]
     
-    np.savetxt(f'simulated_data/catalog_mth_{mth}.txt', cat[cat[:,1]<mth], header = 'L m M ra dec z DL')
-    np.savetxt(f'simulated_data/hosts_mth_{mth}.txt', hosts, header = 'L m M ra dec z DL')
+    np.savetxt(f'simulated_data/catalog_mth_{mth}.txt', cat[cat[:,1]<mth], header = 'L m M ra dec z DL dz')
+    np.savetxt(f'simulated_data/hosts_mth_{mth}.txt', hosts, header = 'L m M ra dec z DL dz')
     
     hosts[:,2] = np.log10(hosts[:,2])
     cat[:,2] = np.log10(cat[:,2])

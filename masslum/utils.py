@@ -1,5 +1,8 @@
 import numpy as np
 
+def create_subcatalog(catalog, z, dz, pos, dpos):
+    return catalog
+
 def rejection_sampler(n_draws, f, bounds):
     """
     Rejection sampler
@@ -14,7 +17,7 @@ def rejection_sampler(n_draws, f, bounds):
         np.ndarray: samples
     """
     n_draws = int(n_draws)
-    x = np.linspace(*bounds, 1000)
+    x       = np.linspace(*bounds, 1000)
     top     = np.max(f(x))
     samples = []
     while len(samples) < n_draws:
@@ -27,7 +30,7 @@ def rejection_sampler(n_draws, f, bounds):
 def log_gaussian(x, m, s):
     return -0.5*((x-m)/s)**2 - 0.5*np.log(2*np.pi) - np.log(s)
 
-def log_gaussian_2d(x, mu, cov):
+def log_gaussian_2d_double(x, mu, cov):
     """
     Multivariate Normal logpdf
     
@@ -42,5 +45,8 @@ def log_gaussian_2d(x, mu, cov):
     inv_cov  = np.linalg.inv(cov)
     v        = x-mu
     exponent = -0.5*(inv_cov[0,0]*v[0]**2 + inv_cov[1,1]*v[1]**2 + 2*inv_cov[0,1]*v[0]*v[1])
-    lognorm  = 0.5*len(mu)*LOG2PI+0.5*np.log(np.linalg.det(cov))
+    lognorm  = 0.5*len(mu)*np.log(2*np.pi)+0.5*np.log(np.linalg.det(cov))
     return -lognorm+exponent
+
+def log_gaussian_2d(x, mu, cov):
+    return np.array([log_gaussian_2d_double(xi, mu, cov) for xi in x])

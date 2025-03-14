@@ -98,7 +98,7 @@ Planck18 = CosmologicalParameters(0.674, 0.315, 0.685, -1, 0, 0)
 Planck15 = CosmologicalParameters(0.679, 0.3065, 0.6935, -1, 0, 0)
 
 # Interpolants up to z = 2.5
-z = np.linspace(0,0.5,1000)
+z = np.linspace(0,1.,1000)
 dvdz_planck18 = Planck18.ComovingVolumeElement(z)/(1e9*(1+z)) # In Gpc^3
 dvdz_planck15 = Planck15.ComovingVolumeElement(z)/(1e9*(1+z)) # In Gpc^3
 
