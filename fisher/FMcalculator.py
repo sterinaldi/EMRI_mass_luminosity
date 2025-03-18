@@ -3,10 +3,8 @@
 # Import packages and functions need
 import numpy as np
 import csv
-import HABmore
+import HABwave_more as wave
 import Detection
-
-import matplotlib.pyplot as plt
 
 from numpy import pi, sqrt, log10
 from numpy.linalg import inv
@@ -79,23 +77,23 @@ sdR_LISA = np.zeros((len(dec),len(RA)))
 for m in M:
 	# Compute the differentiation of the waveforms
 	# For the mass
-	t, hp_Mp, hc_Mp = HABmore.HABwave(m*(1+delt),m2,S,e0,D,iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
-	t, hp_Mm, hc_Mm = HABmore.HABwave(m*(1-delt),m2,S,e0,D,iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
+	t, hp_Mp, hc_Mp = wave.HABwave(m*(1+delt),m2,S,e0,D,iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
+	t, hp_Mm, hc_Mm = wave.HABwave(m*(1-delt),m2,S,e0,D,iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
 
 	dhp_M = (hp_Mp - hp_Mm)/(2*m*delt)
 	dhc_M = (hc_Mp - hc_Mm)/(2*m*delt)
 
 
 	# For the luminosity distance
-	t, hp_Dp, hc_Dp = HABmore.HABwave(m,m2,S,e0,D*(1+delt),iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
-	t, hp_Dm, hc_Dm = HABmore.HABwave(m,m2,S,e0,D*(1-delt),iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
+	t, hp_Dp, hc_Dp = wave.HABwave(m,m2,S,e0,D*(1+delt),iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
+	t, hp_Dm, hc_Dm = wave.HABwave(m,m2,S,e0,D*(1-delt),iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
 
 	dhp_D = (hp_Dp - hp_Dm)/(2*D*delt)
 	dhc_D = (hc_Dp - hc_Dm)/(2*D*delt)
 
 
 	# Generate a waveform for the calculation of sky localization
-	t, hp, hc = HABmore.HABwave(m,m2,S,e0,D,iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
+	t, hp, hc = wave.HABwave(m,m2,S,e0,D,iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
 
 
 	# Set up an empty Fisher matrix
