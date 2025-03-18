@@ -3,7 +3,7 @@
 # Import packages and functions need
 import numpy as np
 import csv
-import HABmore
+import HABwave_more as wave
 import Detection
 
 from numpy import pi, sqrt, log10
@@ -64,7 +64,7 @@ SNR_LISA = np.zeros((len(dec),len(RA)))
 # Consider the different masses
 for m in M:
 	# Call the waveform
-	t, hp, hc = HABmore.HABwave(m,m2,S,e0,D,iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
+	t, hp, hc = wave.HABwave(m,m2,S,e0,D,iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
 	print(log10(m))
 
 	# Consider the different sky positions
