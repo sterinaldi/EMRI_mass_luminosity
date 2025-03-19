@@ -163,5 +163,5 @@ class Sampler():
                                thin_by       = thin,
                                )
         samples = sampler.get_chain()['model_0'].reshape(-1, 2)
-        print(np.sum(np.log10(mass_luminosity_relation(Llow, samples[:,0], samples[:,1])) > 4))
+
         return samples
