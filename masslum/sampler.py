@@ -1,14 +1,13 @@
 import numpy as np
-import raynest
-import raynest.model
 from scipy.interpolate import interp1d
 from scipy.special import logsumexp
+from eryn.ensemble import EnsembleSampler
+from eryn.prior import ProbDistContainer, uniform_dist
 from masslum.luminosity import schechter, schechter_unnorm, log_schechter, mass_luminosity_relation, mass_luminosity_inverse_relation, apparent_magnitude, Llow, Lhigh, zmax
 from masslum.utils import log_gaussian, log_gaussian_2d, rejection_sampler, create_subcatalog
 from masslum.cosmology import Planck15, dVdz_approx_planck15
 
-class Sampler(raynest.model.Model):
-    
+class Sampler():
     def __init__(self, catalog,
                        gw_mass,
                        gw_redshift,
@@ -19,7 +18,6 @@ class Sampler(raynest.model.Model):
                        m_th = 19,
                        n_MC_samples = 1e3,
                        ):
-        super(Sampler,self).__init__()
         # Galaxy catalog (L, ra, dec, z, dz)
         self.catalog = catalog
         self.m_th    = m_th
@@ -46,9 +44,9 @@ class Sampler(raynest.model.Model):
         self.DL_samples   = np.array(self.DL_samples) # Numba required
         self.p_incat      = self.compute_p_incat()
         self.M_samples    = np.array([np.random.normal(M, dM, int(self.n_MC_samples)) for M, dM in zip(self.gw_mass, self.gw_unc_mass)])
-        # RAYNEST parameters
+        # parameters
         self.names  = ['a','b']
-        self.bounds = [[0,3],[0,3]]
+        self.bounds = [[0.,1.],[0,1.2]]
     
     def compute_p_incat(self):
         """
@@ -59,7 +57,6 @@ class Sampler(raynest.model.Model):
         for dl in self.DL_samples:
             m = apparent_magnitude(L_samples, dl)
             p.append(np.sum(m < self.m_th)/len(L_samples))
-        print(p)
         return np.array(p)
     
     def weighted_unobs(self, L, DL):
@@ -78,7 +75,7 @@ class Sampler(raynest.model.Model):
         m    = apparent_magnitude(L, DL)
         p_L  = log_schechter(L)
         p_DL = np.log(dVdz_approx_planck15(z))
-        return np.log(m > self.m_th) + p_L + p_DL
+        return np.where(m > self.m_th, p_L + p_DL, -np.inf)
 
     def log_L_unobs(self, L, DL):
         """
@@ -86,7 +83,7 @@ class Sampler(raynest.model.Model):
         """
         m    = apparent_magnitude(L, DL)
         p_L  = log_schechter(L)
-        return np.log(m > self.m_th) + p_L
+        return np.where(m > self.m_th, p_L, -np.inf)
     
     def compute_p_outcat(self, pts_L = 1000, pts_D = 1000):
         """
@@ -126,30 +123,45 @@ class Sampler(raynest.model.Model):
         self.N_samples.append(self.log_norm(self.DL_samples[-1]))
         return np.log(np.mean(dVdz_approx_planck15(self.z_samples[-1])))
     
-    def log_prior(self, x):
-        logP = super(Sampler,self).log_prior(x)
-        if np.isfinite(logP):
-            return logP
-        return -np.inf
-    
     def log_likelihood(self, x):
-        a         = x['a']
-        b         = x['b']
+        a, b      = x
         logL      = 0.
+        Mlow      = mass_luminosity_relation(Llow, a, b)
         L_samples = mass_luminosity_inverse_relation(self.M_samples, a, b)
-        logp_L_z  = logsumexp(self.log_weighted_unobs(L_samples, self.DL_samples, self.z_samples) - self.N_samples, axis = 1) - np.log(self.n_MC_samples)
+        logp_L_z  = logsumexp(np.where(L_samples > Llow, self.log_weighted_unobs(L_samples, self.DL_samples, self.z_samples), -np.inf) - self.N_samples, axis = 1) - np.log(self.n_MC_samples)
         for i in range(len(self.gw_mass)):
             # In-catalog term
             if self.p_incat[i] > 0:
                 L       = self.subcat[i][:,0]
                 M       = mass_luminosity_relation(L, a, b)
-                logp_M  = log_gaussian(M, self.gw_mass[i], self.gw_unc_mass[i])
+                logp_M  = np.where(M > Mlow, log_gaussian(M, self.gw_mass[i], self.gw_unc_mass[i]), -np.inf)
                 logL_in = logsumexp(logp_M + self.log_p_gal[i] + np.log(self.p_incat[i]))
             else:
                 logL_in = -np.inf
             # Out-of-catalog
             logL_out = -np.log(4*np.pi) + logp_L_z[i] + np.log(1-self.p_incat[i])
             # Combination
-#            print([logL_in, logL_out])
             logL += logsumexp([logL_in, logL_out])
         return logL
+
+    def run_mcmc(self, n_samples, burn = 2000, thin = 15, nwalkers = 10, verbose = True):
+        """
+        Wrapper for Eryn sampler
+        """
+        priors = ProbDistContainer({i: uniform_dist(*b) for i, b in enumerate(self.bounds)})
+        coords = priors.rvs(size = (nwalkers,))
+        sampler = EnsembleSampler(nwalkers    = nwalkers,
+                                  ndims       = 2,
+                                  log_like_fn = self.log_likelihood,
+                                  priors      = priors,
+                                  args        = [],
+                                  )
+        out = sampler.run_mcmc(initial_state = coords,
+                               nsteps        = n_samples//nwalkers,
+                               burn          = burn,
+                               progress      = verbose,
+                               thin_by       = thin,
+                               )
+        samples = sampler.get_chain()['model_0'].reshape(-1, 2)
+        print(np.sum(np.log10(mass_luminosity_relation(Llow, samples[:,0], samples[:,1])) > 4))
+        return samples

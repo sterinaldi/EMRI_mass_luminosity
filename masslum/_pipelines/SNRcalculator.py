@@ -48,6 +48,11 @@ n_lim = 100
 to = 2*yr
 
 def main():
+    # Create folders to save files
+    tianqin_folder = Path('DATA_TianQin')
+    tianqin_folder.mkdir(exist_ok = True)
+    LISA_folder = Path('DATA_LISA')
+    LISA_folder.mkdir(exist_ok = True)
     # Define the array of the masses considered
     M = np.logspace(5,7,21)
 
@@ -90,15 +95,15 @@ def main():
                 SNR_LISA[i][j] = sqrt(Detection.inner_product(h, h, f, psd_LISA))
 
 
-        # Save the SNR in dat-files (create folders 'DATA_TianQin' and 'DATA_LISA' to save the files)
+        # Save the SNR in dat-files
         # Save the SNR in TianQin
-        with open('DATA_TianQin/SNR_TQ_{}.dat'.format(log10(m)), 'w', newline='') as f:
+        with open(Path(tianqin_folder,'SNR_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
             for i in range(len(dec)):
                 writer = csv.writer(f, delimiter=' ')
                 writer.writerow(SNR_TQ[i])
 
         # Save the SNR in LISA
-        with open('DATA_LISA/SNR_LISA_{}.dat'.format(log10(m)), 'w', newline='') as f:
+        with open(Path(LISA_folder,'SNR_LISA_{}.dat'.format(log10(m))), 'w', newline='') as f:
             for i in range(len(dec)):
                 writer = csv.writer(f, delimiter=' ')
                 writer.writerow(SNR_LISA[i])

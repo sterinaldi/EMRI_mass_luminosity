@@ -42,7 +42,7 @@ dependencies = [
     "matplotlib",
     "lalsuite",
     "tqdm",
-    "raynest",
+    "eryn",
     "numba"
     ]
 
