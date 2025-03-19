@@ -8,7 +8,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ['masslum']
+packages = ['masslum', 'masslum.fisher', 'masslum._pipelines']
 
 [project]
 name = 'masslum'
@@ -49,3 +49,7 @@ dependencies = [
 [project.urls]
 Repository = "https://github.com/sterinaldi/EMRI_mass_luminosity.git"
 Issues = "https://github.com/sterinaldi/EMRI_mass_luminosity/issues"
+
+[project.scripts]
+EMRI-SNR = "masslum._pipelines.SNRcalculator:main"
+EMRI-FM  = "masslum._pipelines.FMcalculator:main"
