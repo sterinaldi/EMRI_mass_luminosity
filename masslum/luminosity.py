@@ -1,4 +1,5 @@
 import numpy as np
+from numba import njit
 from masslum.cosmology import Planck15 as omega, dVdz_approx_planck15
 from masslum.utils import rejection_sampler
 
@@ -10,17 +11,19 @@ Lstar = 1.2*(1e10)/(omega.h**2)
 Llow  = 0.001*Lstar
 Lhigh = 10*Lstar
 mth   = 19
-zmax  = 0.3
-gal_density = 1./10000000 #gal/Mpc^3
+zmax  = 0.12
+gal_density = 1./1000000 #gal/Mpc^3
 
 # Mass-luminosity relation from Ding et al (2020) – https://arxiv.org/pdf/1910.11875
 # log(M/10^7 Msun) = 0.49 + 0.90 log(L/10^10 Lsun)
 a_ding = 0.90
 b_ding = 0.49
 
+@njit
 def mass_luminosity_relation(L, a, b):
     return np.exp(b + a*np.log(L*1e-10))*1e7
 
+@njit
 def mass_luminosity_inverse_relation(M, a, b):
     return np.exp((np.log(M*1e-7)-b)/a)*1e10
 
@@ -38,15 +41,18 @@ z_norm = np.linspace(0, zmax, 1001)[1:]
 dz     = z_norm[1]-z_norm[0]
 norm_z = np.sum(redshift_distribution_unnorm(z_norm)*dz)
 
+@njit
 def schechter(L):
-    return ((L/Lstar)**alpha)*np.exp(-L/Lstar)/(Lstar*norm_schechter)
+    return 1.#((L/Lstar)**alpha)*np.exp(-L/Lstar)/(Lstar*norm_schechter)
 
+@njit
 def log_schechter(L):
-    return alpha*np.log(L/Lstar) -L/Lstar - np.log(Lstar) -np.log(norm_schechter)
+    return 0.#alpha*np.log(L/Lstar) -L/Lstar - np.log(Lstar) -np.log(norm_schechter)
 
 def redshift_distribution(z):
     return omega.ComovingVolumeElement(z)/((1+z)*norm_z)
 
+@njit
 def apparent_magnitude(L, DL):
     return 25 - 2.5*np.log10(L/L0) + 5*np.log10(DL)
 
@@ -56,7 +62,7 @@ def selection_function(x):
     return m < mth
 
 def sample_catalog(n_galaxies = 1, select = False):
-    L   = rejection_sampler(n_galaxies, schechter, [Llow,Lhigh])
+    L   = rejection_sampler(n_galaxies, schechter_unnorm, [Llow,Lhigh])
     M   = mass_luminosity_relation(L, a_ding, b_ding)
     z   = rejection_sampler(n_galaxies, redshift_distribution, [0,zmax])
     dz  = z*0.05

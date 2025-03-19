@@ -102,10 +102,13 @@ z = np.linspace(0,1.,1000)
 dvdz_planck18 = Planck18.ComovingVolumeElement(z)/(1e9*(1+z)) # In Gpc^3
 dvdz_planck15 = Planck15.ComovingVolumeElement(z)/(1e9*(1+z)) # In Gpc^3
 
+norm_planck15 = np.sum(dvdz_planck15*(z[1]-z[0]))
+norm_planck18 = np.sum(dvdz_planck18*(z[1]-z[0]))
+
 @njit
 def dVdz_approx_planck15(x):
-    return np.interp(x, z/np.sum(dvdz_planck15*(z[1]-z[0])), dvdz_planck15)
+    return np.interp(x, z, dvdz_planck15/norm_planck15)
 
 @njit
 def dVdz_approx_planck18(x):
-    return np.interp(x, z/np.sum(dvdz_planck18*(z[1]-z[0])), dvdz_planck18)
+    return np.interp(x, z, dvdz_planck18/norm_planck18)
