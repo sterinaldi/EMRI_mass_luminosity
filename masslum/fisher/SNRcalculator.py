@@ -3,8 +3,8 @@
 # Import packages and functions need
 import numpy as np
 import csv
-import HABwave_more as wave
-import Detection
+import masslum.fisher.HABwave_more as wave
+import masslum.fisher.Detection as Detection
 
 from numpy import pi, sqrt, log10
 
@@ -63,44 +63,44 @@ SNR_LISA = np.zeros((len(dec),len(RA)))
 # Compute the SNR for different masses at different sky localizations
 # Consider the different masses
 for m in M:
-	# Call the waveform
-	t, hp, hc = wave.HABwave(m,m2,S,e0,D,iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
-	print(log10(m))
+    # Call the waveform
+    t, hp, hc = wave.HABwave(m,m2,S,e0,D,iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
+    print(log10(m))
 
-	# Consider the different sky positions
-	for i in range(len(dec)):
-		print(dec[i])
-		for j in range(len(RA)):
-			print(RA[j])
-			# Compute the signal detected by TianQin and Fourier transform it
-			f, h = Detection.fourier_TQ(t, hp, hc, dec[i], RA[j], f_min, f_max)
+    # Consider the different sky positions
+    for i in range(len(dec)):
+        print(dec[i])
+        for j in range(len(RA)):
+            print(RA[j])
+            # Compute the signal detected by TianQin and Fourier transform it
+            f, h = Detection.fourier_TQ(t, hp, hc, dec[i], RA[j], f_min, f_max)
 
-			# Compute TianQin's PSD
-			psd_TQ = Detection.PSD_TQ(f)
+            # Compute TianQin's PSD
+            psd_TQ = Detection.PSD_TQ(f)
 
-			# Compute and safe the SNR in TianQin
-			SNR_TQ[i][j] = sqrt(Detection.inner_product(h, h, f, psd_TQ))
-
-
-			# Compute the signal detected by LISA and Fourier transform it
-			f, h = Detection.fourier_LISA(t, hp, hc, dec[i], RA[j], f_min, f_max)
-
-			# Compute LISA's PSD
-			psd_LISA = Detection.PSD_LISA(f)
-
-			# Compute and safe the SNR in LISA
-			SNR_LISA[i][j] = sqrt(Detection.inner_product(h, h, f, psd_LISA))
+            # Compute and safe the SNR in TianQin
+            SNR_TQ[i][j] = sqrt(Detection.inner_product(h, h, f, psd_TQ))
 
 
-	# Save the SNR in dat-files (create folders 'DATA_TianQin' and 'DATA_LISA' to save the files)
-	# Save the SNR in TianQin
-	with open('DATA_TianQin/SNR_TQ_{}.dat'.format(log10(m)), 'w', newline='') as f:
-		for i in range(len(dec)):
-			writer = csv.writer(f, delimiter=' ')
-			writer.writerow(SNR_TQ[i])
+            # Compute the signal detected by LISA and Fourier transform it
+            f, h = Detection.fourier_LISA(t, hp, hc, dec[i], RA[j], f_min, f_max)
 
-	# Save the SNR in LISA
-	with open('DATA_LISA/SNR_LISA_{}.dat'.format(log10(m)), 'w', newline='') as f:
-		for i in range(len(dec)):
-			writer = csv.writer(f, delimiter=' ')
-			writer.writerow(SNR_LISA[i])
+            # Compute LISA's PSD
+            psd_LISA = Detection.PSD_LISA(f)
+
+            # Compute and safe the SNR in LISA
+            SNR_LISA[i][j] = sqrt(Detection.inner_product(h, h, f, psd_LISA))
+
+
+    # Save the SNR in dat-files (create folders 'DATA_TianQin' and 'DATA_LISA' to save the files)
+    # Save the SNR in TianQin
+    with open('DATA_TianQin/SNR_TQ_{}.dat'.format(log10(m)), 'w', newline='') as f:
+        for i in range(len(dec)):
+            writer = csv.writer(f, delimiter=' ')
+            writer.writerow(SNR_TQ[i])
+
+    # Save the SNR in LISA
+    with open('DATA_LISA/SNR_LISA_{}.dat'.format(log10(m)), 'w', newline='') as f:
+        for i in range(len(dec)):
+            writer = csv.writer(f, delimiter=' ')
+            writer.writerow(SNR_LISA[i])
