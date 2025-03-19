@@ -66,13 +66,10 @@ def main():
     for m in M:
         # Call the waveform
         t, hp, hc = wave.HABwave(m,m2,S,e0,D,iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
-        print(log10(m))
 
         # Consider the different sky positions
         for i in range(len(dec)):
-            print(dec[i])
             for j in range(len(RA)):
-                print(RA[j])
                 # Compute the signal detected by TianQin and Fourier transform it
                 f, h = Detection.fourier_TQ(t, hp, hc, dec[i], RA[j], f_min, f_max)
 
