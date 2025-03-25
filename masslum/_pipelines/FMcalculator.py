@@ -23,8 +23,8 @@ yr = 3.1536e7 # in s
 # D: the distance of the source in Mpc
 # iota: the angle between the spin and the orbital angular momentum
 # delta: the angle between the angular momentum and the GW's propagation direction in rad
-# dec: the source's declination in rad [-pi/2,pi/2]
-# RA: the source's right ascenssion in rad [0,2pi]
+# col: the source's ecliptic colatitude in rad [-pi/2,pi/2]
+# lon: the source's ecliptic longitude in rad [0,2pi]
 # alpha0: the initial angle of the first precession in rad
 # gamma0: the initial angle of the second precession in rad
 # eta0: the initial angle of the detector's position in rad
@@ -64,21 +64,21 @@ def main():
     M = np.logspace(5,7,5)
 
     # Define the arrays of the sky localizations considered
-    dec = pi*np.linspace(-85,85,18)/180
-    RA = pi*np.linspace(5,355,36)/180
+    col = pi*np.linspace(-85,85,18)/180
+    lon = pi*np.linspace(5,355,36)/180
 
 
     # Create arrays to save the sigmas
-    sM_TQ = np.zeros((len(dec),len(RA)))
-    sD_TQ = np.zeros((len(dec),len(RA)))
-    sdd_TQ = np.zeros((len(dec),len(RA)))
-    sRR_TQ = np.zeros((len(dec),len(RA)))
-    sdR_TQ = np.zeros((len(dec),len(RA)))
-    sM_LISA = np.zeros((len(dec),len(RA)))
-    sD_LISA = np.zeros((len(dec),len(RA)))
-    sdd_LISA = np.zeros((len(dec),len(RA)))
-    sRR_LISA = np.zeros((len(dec),len(RA)))
-    sdR_LISA = np.zeros((len(dec),len(RA)))
+    sM_TQ = np.zeros((len(col),len(lon)))
+    sD_TQ = np.zeros((len(col),len(lon)))
+    scc_TQ = np.zeros((len(col),len(lon)))
+    sll_TQ = np.zeros((len(col),len(lon)))
+    scl_TQ = np.zeros((len(col),len(lon)))
+    sM_LISA = np.zeros((len(col),len(lon)))
+    sD_LISA = np.zeros((len(col),len(lon)))
+    scc_LISA = np.zeros((len(col),len(lon)))
+    sll_LISA = np.zeros((len(col),len(lon)))
+    scl_LISA = np.zeros((len(col),len(lon)))
 
 
     # Compute the SNR for different masses at different sky localizations
@@ -105,22 +105,22 @@ def main():
         F = np.zeros((4,4))
 
         # Consider the different sky positions
-        for i in range(len(dec)):
-            for j in range(len(RA)):
+        for i in range(len(col)):
+            for j in range(len(lon)):
                 # Compute the signals detected by TianQin and Fourier transform them
                 # For the mass and the luminosity distance
-                f, dh_M = Detection.fourier_TQ(t, dhp_M, dhc_M, dec[i], RA[j], f_min, f_max)
-                f, dh_D = Detection.fourier_TQ(t, dhp_D, dhc_D, dec[i], RA[j], f_min, f_max)
+                f, dh_M = Detection.fourier_TQ(t, dhp_M, dhc_M, col[i], lon[j], f_min, f_max)
+                f, dh_D = Detection.fourier_TQ(t, dhp_D, dhc_D, col[i], lon[j], f_min, f_max)
 
 
                 # Compute the Fourier transformed differentiation over the sky positions for TianQin
-                f, h_dp = Detection.fourier_TQ(t, hp, hc, dec[i]*(1+delt), RA[j], f_min, f_max)
-                f, h_dm = Detection.fourier_TQ(t, hp, hc, dec[i]*(1-delt), RA[j], f_min, f_max)
-                dh_d = (h_dp - h_dm)/(2*dec[i]*delt)
+                f, h_cp = Detection.fourier_TQ(t, hp, hc, col[i]*(1+delt), lon[j], f_min, f_max)
+                f, h_cm = Detection.fourier_TQ(t, hp, hc, col[i]*(1-delt), lon[j], f_min, f_max)
+                dh_c = (h_cp - h_cm)/(2*col[i]*delt)
                 
-                f, h_Rp = Detection.fourier_TQ(t, hp, hc, dec[i], RA[j]*(1+delt), f_min, f_max)
-                f, h_Rm = Detection.fourier_TQ(t, hp, hc, dec[i], RA[j]*(1-delt), f_min, f_max)
-                dh_R = (h_Rp - h_Rm)/(2*RA[i]*delt)
+                f, h_lp = Detection.fourier_TQ(t, hp, hc, col[i], lon[j]*(1+delt), f_min, f_max)
+                f, h_lm = Detection.fourier_TQ(t, hp, hc, col[i], lon[j]*(1-delt), f_min, f_max)
+                dh_l = (h_lp - h_lm)/(2*lon[i]*delt)
 
 
                 # Compute TianQin's PSD
@@ -130,38 +130,38 @@ def main():
                 # Compute and safe the elements of the Fisher matrix for TianQin
                 F[0][0] = Detection.inner_product(dh_M, dh_M, f, psd_TQ)
                 F[0][1] = F[1][0] = Detection.inner_product(dh_M, dh_D, f, psd_TQ)
-                F[0][2] = F[2][0] = Detection.inner_product(dh_M, dh_d, f, psd_TQ)
-                F[0][3] = F[3][0] = Detection.inner_product(dh_M, dh_R, f, psd_TQ)
+                F[0][2] = F[2][0] = Detection.inner_product(dh_M, dh_c, f, psd_TQ)
+                F[0][3] = F[3][0] = Detection.inner_product(dh_M, dh_l, f, psd_TQ)
                 F[1][1] = Detection.inner_product(dh_D, dh_D, f, psd_TQ)
-                F[1][2] = F[2][1] = Detection.inner_product(dh_D, dh_d, f, psd_TQ)
-                F[1][3] = F[3][1] = Detection.inner_product(dh_D, dh_R, f, psd_TQ)
-                F[2][2] = Detection.inner_product(dh_d, dh_d, f, psd_TQ)
-                F[2][3] = F[3][2] = Detection.inner_product(dh_d, dh_R, f, psd_TQ)
-                F[3][3] = Detection.inner_product(dh_R, dh_R, f, psd_TQ)
+                F[1][2] = F[2][1] = Detection.inner_product(dh_D, dh_c, f, psd_TQ)
+                F[1][3] = F[3][1] = Detection.inner_product(dh_D, dh_l, f, psd_TQ)
+                F[2][2] = Detection.inner_product(dh_c, dh_c, f, psd_TQ)
+                F[2][3] = F[3][2] = Detection.inner_product(dh_c, dh_l, f, psd_TQ)
+                F[3][3] = Detection.inner_product(dh_l, dh_l, f, psd_TQ)
 
                 # Obtain the detection errors by inverting the Fisher matrix and save them
                 Sig = inv(F)
 
                 sM_TQ[i][j] = Sig[0][0]
                 sD_TQ[i][j] = Sig[1][1]
-                sdd_TQ[i][j] = Sig[2][2]
-                sRR_TQ[i][j] = Sig[3][3]
-                sdR_TQ[i][j] = Sig[2][3]
+                scc_TQ[i][j] = Sig[2][2]
+                sll_TQ[i][j] = Sig[3][3]
+                scl_TQ[i][j] = Sig[2][3]
                 
                 # Compute the signals detected by LISA and Fourier transform them
                 # For the mass and the luminosity distance
-                f, dh_M = Detection.fourier_LISA(t, dhp_M, dhc_M, dec[i], RA[j], f_min, f_max)
-                f, dh_D = Detection.fourier_LISA(t, dhp_D, dhc_D, dec[i], RA[j], f_min, f_max)
+                f, dh_M = Detection.fourier_LISA(t, dhp_M, dhc_M, col[i], lon[j], f_min, f_max)
+                f, dh_D = Detection.fourier_LISA(t, dhp_D, dhc_D, col[i], lon[j], f_min, f_max)
 
 
                 # Compute the Fourier transformed differentiation over the sky positions for TianQin
-                f, h_dp = Detection.fourier_LISA(t, hp, hc, dec[i]*(1+delt), RA[j], f_min, f_max)
-                f, h_dm = Detection.fourier_LISA(t, hp, hc, dec[i]*(1-delt), RA[j], f_min, f_max)
-                dh_d = (h_dp - h_dm)/(2*dec[i]*delt)
+                f, h_cp = Detection.fourier_LISA(t, hp, hc, col[i]*(1+delt), lon[j], f_min, f_max)
+                f, h_cm = Detection.fourier_LISA(t, hp, hc, col[i]*(1-delt), lon[j], f_min, f_max)
+                dh_c = (h_cp - h_cm)/(2*col[i]*delt)
 
-                f, h_Rp = Detection.fourier_LISA(t, hp, hc, dec[i], RA[j]*(1+delt), f_min, f_max)
-                f, h_Rm = Detection.fourier_LISA(t, hp, hc, dec[i], RA[j]*(1-delt), f_min, f_max)
-                dh_R = (h_Rp - h_Rm)/(2*RA[i]*delt)
+                f, h_lp = Detection.fourier_LISA(t, hp, hc, col[i], lon[j]*(1+delt), f_min, f_max)
+                f, h_lm = Detection.fourier_LISA(t, hp, hc, col[i], lon[j]*(1-delt), f_min, f_max)
+                dh_l = (h_lp - h_lm)/(2*lon[i]*delt)
 
 
                 # Compute LISA's PSD
@@ -171,85 +171,85 @@ def main():
                 # Compute and safe the elements of the Fisher matrix for TianQin
                 F[0][0] = Detection.inner_product(dh_M, dh_M, f, psd_LISA)
                 F[0][1] = F[1][0] = Detection.inner_product(dh_M, dh_D, f, psd_LISA)
-                F[0][2] = F[2][0] = Detection.inner_product(dh_M, dh_d, f, psd_LISA)
-                F[0][3] = F[3][0] = Detection.inner_product(dh_M, dh_R, f, psd_LISA)
+                F[0][2] = F[2][0] = Detection.inner_product(dh_M, dh_c, f, psd_LISA)
+                F[0][3] = F[3][0] = Detection.inner_product(dh_M, dh_l, f, psd_LISA)
                 F[1][1] = Detection.inner_product(dh_D, dh_D, f, psd_LISA)
-                F[1][2] = F[2][1] = Detection.inner_product(dh_D, dh_d, f, psd_LISA)
-                F[1][3] = F[3][1] = Detection.inner_product(dh_D, dh_R, f, psd_LISA)
-                F[2][2] = Detection.inner_product(dh_d, dh_d, f, psd_LISA)
-                F[2][3] = F[3][2] = Detection.inner_product(dh_d, dh_R, f, psd_LISA)
-                F[3][3] = Detection.inner_product(dh_R, dh_R, f, psd_LISA)
+                F[1][2] = F[2][1] = Detection.inner_product(dh_D, dh_c, f, psd_LISA)
+                F[1][3] = F[3][1] = Detection.inner_product(dh_D, dh_l, f, psd_LISA)
+                F[2][2] = Detection.inner_product(dh_c, dh_c, f, psd_LISA)
+                F[2][3] = F[3][2] = Detection.inner_product(dh_c, dh_l, f, psd_LISA)
+                F[3][3] = Detection.inner_product(dh_l, dh_l, f, psd_LISA)
                 
                 # Obtain the detection errors by inverting the Fisher matrix and save them
                 Sig = inv(F)
 
                 sMM_LISA[i][j] = Sig[0][0]
                 sDD_LISA[i][j] = Sig[1][1]
-                sdd_LISA[i][j] = Sig[2][2]
-                sRR_LISA[i][j] = Sig[3][3]
-                sdR_LISA[i][j] = Sig[2][3]
+                scc_LISA[i][j] = Sig[2][2]
+                sll_LISA[i][j] = Sig[3][3]
+                scl_LISA[i][j] = Sig[2][3]
 
         # Save the detection accuracy in dat-files
 	    # Save sigma^2 for the mass in TianQin
         with open(Path(tianqin_folder,'sigMM2_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
-	        for i in range(len(dec)):
+	        for i in range(len(col)):
 		        writer = csv.writer(f, delimiter=' ')
 		        writer.writerow(sMM_TQ[i])
 
     	# Save sigma^2 for the distance in TianQin
         with open(Path(tianqin_folder,'sigDD2_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
-		    for i in range(len(dec)):
+		    for i in range(len(col)):
 			    writer = csv.writer(f, delimiter=' ')
     			writer.writerow(sDD_TQ[i])
 
-	    # Save sigma^2 for the declination in TianQin
-        with open(Path(tianqin_folder,'sigdd2_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
-	    	for i in range(len(dec)):
+	    # Save sigma^2 for the colatitude in TianQin
+        with open(Path(tianqin_folder,'sigcc2_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
+	    	for i in range(len(col)):
 		    	writer = csv.writer(f, delimiter=' ')
-			    writer.writerow(sdd_TQ[i])
+			    writer.writerow(scc_TQ[i])
 
-    	# Save sigma^2 for the right ascension in TianQin
-        with open(Path(tianqin_folder,'sigRR2_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
-	    	for i in range(len(dec)):
+    	# Save sigma^2 for the longitude in TianQin
+        with open(Path(tianqin_folder,'sigll2_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
+	    	for i in range(len(col)):
 		    	writer = csv.writer(f, delimiter=' ')
-			    writer.writerow(sRR_TQ[i])
+			    writer.writerow(sll_TQ[i])
 
-    	# Save diagonal element for declination and right ascension in TianQin
-        with open(Path(tianqin_folder,'sigdR_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
-	    	for i in range(len(dec)):
+    	# Save diagonal element for colatitude and longitude in TianQin
+        with open(Path(tianqin_folder,'sigcl_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
+	    	for i in range(len(col)):
 		    	writer = csv.writer(f, delimiter=' ')
-			    writer.writerow(sdR_TQ[i])
+			    writer.writerow(scl_TQ[i])
 
 
     	# Save sigma^2 for the mass in LISA
         with open(Path(LISA_folder,'sigMM2_LISA_{}.dat'.format(log10(m))), 'w', newline='') as f:
-	    	for i in range(len(dec)):
+	    	for i in range(len(col)):
 		    	writer = csv.writer(f, delimiter=' ')
 			    writer.writerow(sMM_LISA[i])
 
     	# Save sigma^2 for the distance in LISA
         with open(Path(LISA_folder,'sigDD2_LISA_{}.dat'.format(log10(m))), 'w', newline='') as f:
-	    	for i in range(len(dec)):
+	    	for i in range(len(col)):
 		    	writer = csv.writer(f, delimiter=' ')
 			    writer.writerow(sDD_LISA[i])
 
-    	# Save sigma^2 for the declination in LISA
-        with open(Path(LISA_folder,'sigdd2_LISA_{}.dat'.format(log10(m)), 'w', newline='') as f:
-	    	for i in range(len(dec)):
+    	# Save sigma^2 for the colatitude in LISA
+        with open(Path(LISA_folder,'sigcc2_LISA_{}.dat'.format(log10(m)), 'w', newline='') as f:
+	    	for i in range(len(col)):
 		    	writer = csv.writer(f, delimiter=' ')
-			    writer.writerow(sdd_LISA[i])
+			    writer.writerow(scc_LISA[i])
 
-    	# Save sigma^2 for the right ascension in LISA
-            with open(Path(LISA_folder,'sigRR2_LISA_{}.dat'.format(log10(m))), 'w', newline='') as f:
-    		for i in range(len(dec)):
+    	# Save sigma^2 for the longitude in LISA
+            with open(Path(LISA_folder,'sigll2_LISA_{}.dat'.format(log10(m))), 'w', newline='') as f:
+    		for i in range(len(col)):
 	    		writer = csv.writer(f, delimiter=' ')
-		    	writer.writerow(sRR_LISA[i])
+		    	writer.writerow(sll_LISA[i])
 
-    	# Save diagonal element for declination and right ascension in LISA
-        with open(Path(LISA_folder,'sigdR_LISA_{}.dat'.format(log10(m))), 'w', newline='') as f:
-	    	for i in range(len(dec)):
+    	# Save diagonal element for colatitude and longitude in LISA
+        with open(Path(LISA_folder,'sigcl_LISA_{}.dat'.format(log10(m))), 'w', newline='') as f:
+	    	for i in range(len(col)):
 		    	writer = csv.writer(f, delimiter=' ')
-			    writer.writerow(sdR_LISA[i])
+			    writer.writerow(scl_LISA[i])
 
 if __name__ == '__main__':
     main()

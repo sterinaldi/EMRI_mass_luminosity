@@ -20,8 +20,8 @@ yr = 3.1536e7 # in s
 # D: the distance of the source in Mpc
 # iota: the angle between the spin and the orbital angular momentum
 # delta: the angle between the angular momentum and the GW's propagation direction in rad
-# dec: the source's declination in rad [-pi/2,pi/2]
-# RA: the source's right ascenssion in rad [0,2pi]
+# col: the source's ecliptic colatitude in rad [-pi/2,pi/2]
+# lon: the source's ecliptic longitude in rad [0,2pi]
 # alpha0: the initial angle of the first precession in rad
 # gamma0: the initial angle of the second precession in rad
 # eta0: the initial angle of the detector's position in rad
@@ -49,21 +49,22 @@ to = 2*yr
 
 def main():
     # Create folders to save files
-    tianqin_folder = Path('DATA_TianQin')
+    tianqin_folder = Path('SNR_TianQin')
     tianqin_folder.mkdir(exist_ok = True)
-    LISA_folder = Path('DATA_LISA')
+    LISA_folder = Path('SNR_LISA')
     LISA_folder.mkdir(exist_ok = True)
+
     # Define the array of the masses considered
     M = np.logspace(5,7,21)
 
     # Define the arrays of the sky localizations considered
-    dec = pi*np.linspace(-85,85,18)/180
-    RA = pi*np.linspace(5,355,36)/180
+    col = pi*np.linspace(-85,85,18)/180
+    lon = pi*np.linspace(5,355,36)/180
 
 
     # Create arrays to save the SNRs
-    SNR_TQ = np.zeros((len(dec),len(RA)))
-    SNR_LISA = np.zeros((len(dec),len(RA)))
+    SNR_TQ = np.zeros((len(col),len(lon)))
+    SNR_LISA = np.zeros((len(col),len(lon)))
 
 
     # Compute the SNR for different masses at different sky localizations
@@ -73,10 +74,10 @@ def main():
         t, hp, hc = wave.HABwave(m,m2,S,e0,D,iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
 
         # Consider the different sky positions
-        for i in range(len(dec)):
-            for j in range(len(RA)):
+        for i in range(len(col)):
+            for j in range(len(lon)):
                 # Compute the signal detected by TianQin and Fourier transform it
-                f, h = Detection.fourier_TQ(t, hp, hc, dec[i], RA[j], f_min, f_max)
+                f, h = Detection.fourier_TQ(t, hp, hc, col[i], lon[j], f_min, f_max)
 
                 # Compute TianQin's PSD
                 psd_TQ = Detection.PSD_TQ(f)
@@ -86,7 +87,7 @@ def main():
 
 
                 # Compute the signal detected by LISA and Fourier transform it
-                f, h = Detection.fourier_LISA(t, hp, hc, dec[i], RA[j], f_min, f_max)
+                f, h = Detection.fourier_LISA(t, hp, hc, col[i], lon[j], f_min, f_max)
 
                 # Compute LISA's PSD
                 psd_LISA = Detection.PSD_LISA(f)
@@ -98,13 +99,13 @@ def main():
         # Save the SNR in dat-files
         # Save the SNR in TianQin
         with open(Path(tianqin_folder,'SNR_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
-            for i in range(len(dec)):
+            for i in range(len(col)):
                 writer = csv.writer(f, delimiter=' ')
                 writer.writerow(SNR_TQ[i])
 
         # Save the SNR in LISA
         with open(Path(LISA_folder,'SNR_LISA_{}.dat'.format(log10(m))), 'w', newline='') as f:
-            for i in range(len(dec)):
+            for i in range(len(col)):
                 writer = csv.writer(f, delimiter=' ')
                 writer.writerow(SNR_LISA[i])
 

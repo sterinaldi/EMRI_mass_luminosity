@@ -19,8 +19,8 @@ c = 2.998e8 # in m/s
 # phiS: the source's azimuthal angle in rad [0,2pi]
 # qK: the spin's polar angle in rad [0,pi]
 # phiK: the spin's azimuthal anglein rad [0,pi]
-# dec: the source's declination in rad [-pi/2,pi/2]
-# RA: the source's right ascenssion in rad [0,2pi]
+# col: the source's ecliptic colatitude in rad [-pi/2,pi/2]
+# lon: the source's ecliptic longitude in rad [0,2pi]
 # time: the time steps of the waveform considred in s
 # h, h1, h2: the strain of the waveforms considred
 # hp, hc: the plus and cross polarizations of the waveform
@@ -230,9 +230,9 @@ def padding(time, h, f_min):
 
 
 # A function to Fourier transform the detected signal in TianQin
-def fourier_TQ(time, hp, hc, dec, RA, f_min, f_max):
+def fourier_TQ(time, hp, hc, col, lon, f_min, f_max):
     # Generate the response pattern for TianQin (spin aligned with z-axis)
-    F_plus, F_cross = F_TQ(time,dec+pi/2,RA,0,0)
+    F_plus, F_cross = F_TQ(time,col+pi/2,lon,0,0)
 
     # Generate the waveform detected
     h = (hp*F_plus + hc*F_cross)*OO_TQ(time)
@@ -252,9 +252,9 @@ def fourier_TQ(time, hp, hc, dec, RA, f_min, f_max):
 
 
 # A function to Fourier transform the detected signal in LISA
-def fourier_LISA(time, hp, hc, dec, RA, f_min, f_max):
+def fourier_LISA(time, hp, hc, col, lon, f_min, f_max):
     # Generate the response pattern for TianQin (spin aligned with z-axis)
-    F_plus, F_cross = F_LISA(time,dec+pi/2,RA,0,0)
+    F_plus, F_cross = F_LISA(time,col+pi/2,lon,0,0)
 
     # Generate the waveform detected
     h = (hp*F_plus + hc*F_cross)*OO_LISA(time)
