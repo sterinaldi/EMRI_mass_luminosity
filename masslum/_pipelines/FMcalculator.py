@@ -191,25 +191,25 @@ def main():
 
         # Save the detection accuracy in dat-files
 	    # Save sigma^2 for the mass in TianQin
-        with open(Path(tianqin_folder,'sigMM2_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
+        with open(Path(tianqin_folder,'sigMM_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
 	        for i in range(len(col)):
 		        writer = csv.writer(f, delimiter=' ')
 		        writer.writerow(sMM_TQ[i])
 
     	# Save sigma^2 for the distance in TianQin
-        with open(Path(tianqin_folder,'sigDD2_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
+        with open(Path(tianqin_folder,'sigDD_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
 		    for i in range(len(col)):
 			    writer = csv.writer(f, delimiter=' ')
     			writer.writerow(sDD_TQ[i])
 
 	    # Save sigma^2 for the colatitude in TianQin
-        with open(Path(tianqin_folder,'sigcc2_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
+        with open(Path(tianqin_folder,'sigcc_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
 	    	for i in range(len(col)):
 		    	writer = csv.writer(f, delimiter=' ')
 			    writer.writerow(scc_TQ[i])
 
     	# Save sigma^2 for the longitude in TianQin
-        with open(Path(tianqin_folder,'sigll2_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
+        with open(Path(tianqin_folder,'sigll_TQ_{}.dat'.format(log10(m))), 'w', newline='') as f:
 	    	for i in range(len(col)):
 		    	writer = csv.writer(f, delimiter=' ')
 			    writer.writerow(sll_TQ[i])
@@ -222,25 +222,25 @@ def main():
 
 
     	# Save sigma^2 for the mass in LISA
-        with open(Path(LISA_folder,'sigMM2_LISA_{}.dat'.format(log10(m))), 'w', newline='') as f:
+        with open(Path(LISA_folder,'sigMM_LISA_{}.dat'.format(log10(m))), 'w', newline='') as f:
 	    	for i in range(len(col)):
 		    	writer = csv.writer(f, delimiter=' ')
 			    writer.writerow(sMM_LISA[i])
 
     	# Save sigma^2 for the distance in LISA
-        with open(Path(LISA_folder,'sigDD2_LISA_{}.dat'.format(log10(m))), 'w', newline='') as f:
+        with open(Path(LISA_folder,'sigDD_LISA_{}.dat'.format(log10(m))), 'w', newline='') as f:
 	    	for i in range(len(col)):
 		    	writer = csv.writer(f, delimiter=' ')
 			    writer.writerow(sDD_LISA[i])
 
     	# Save sigma^2 for the colatitude in LISA
-        with open(Path(LISA_folder,'sigcc2_LISA_{}.dat'.format(log10(m)), 'w', newline='') as f:
+        with open(Path(LISA_folder,'sigcc_LISA_{}.dat'.format(log10(m)), 'w', newline='') as f:
 	    	for i in range(len(col)):
 		    	writer = csv.writer(f, delimiter=' ')
 			    writer.writerow(scc_LISA[i])
 
     	# Save sigma^2 for the longitude in LISA
-            with open(Path(LISA_folder,'sigll2_LISA_{}.dat'.format(log10(m))), 'w', newline='') as f:
+            with open(Path(LISA_folder,'sigll_LISA_{}.dat'.format(log10(m))), 'w', newline='') as f:
     		for i in range(len(col)):
 	    		writer = csv.writer(f, delimiter=' ')
 		    	writer.writerow(sll_LISA[i])
