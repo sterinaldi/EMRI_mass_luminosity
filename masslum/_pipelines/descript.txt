@@ -4,8 +4,21 @@ The suffix of the files is log10(m), where m is the observed mass of the super m
 
 Each file contains 18 lines with 36 columns.
 
-The lines correspond to the ecliptic colatitutes -pi*85/180, -pi*75/180, ..., pi*85/180, respectively.
+The lines correspond to the ecliptic colatitutes -85, -75, ..., 85, respectively.
 
-The columns correspond to the ecliptic longitudes pi*5/180, pi*15/180, ..., pi*355/180, respectively.
+The columns correspond to the ecliptic longitudes 5, 15, ..., 355, respectively.
 
-The sources are set at a luminosity distance of 20 Mpc, with an average inlcination of delta = pi/6. The mass of the small black hole is fixed at 30 solar masses and the observation time is 2 years.
+The sources are set at a luminosity distance of 20 Mpc, with an average inlcination of delta = pi/6. The mass of the small black hole is fixed at 30 solar masses and the observation time is 2 years. The initial eccentrity is 0.2.
+
+
+FILE DESCRIPTION: FM_TianQin, FM_LISA
+
+There are five classes of files 'sigMM', 'sigDD', 'sigcc', 'sigll', and 'sigcl' containing the elements of the covariance matrix (inverse of the Fisher matrix) corresponing to the error (square) of the total mass in solar masses, the luminosity distance in megaparsec, the sky localization along the ecliptic colatitude in rad, the sky localization along the ecliptic longitude in rad, and the diagonal element of the colatitude and the longitude, respectively. The suffix of the files is log10(m), where m is the observed mass of the super massive black hole in solar masses.
+
+Each file contains 18 lines with 36 columns.
+
+The lines correspond to the ecliptic colatitutes -85, -75, ..., 85, respectively.
+
+The columns correspond to the ecliptic longitudes 5, 15, ..., 355, respectively.
+
+The sources are set at a luminosity distance of 20 Mpc, with an average inlcination of delta = pi/6. The mass of the small black hole is fixed at 30 solar masses and the observation time is 2 years. The initial eccentrity is 0.2.
