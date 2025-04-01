@@ -9,7 +9,7 @@ Lsun  = 3.8*1e26
 L0    = 3.0128*1e28/Lsun
 Lstar = 1.2*(1e10)/(omega.h**2)
 Llow  = 0.0001*Lstar
-Lhigh = 10*Lstar
+Lhigh = 3*Lstar
 mth   = 19
 zmax  = 0.12
 gal_density = 1./10000 #gal/Mpc^3
@@ -43,11 +43,11 @@ norm_z = np.sum(redshift_distribution_unnorm(z_norm)*dz)
 
 @njit
 def schechter(L):
-    return 1.#((L/Lstar)**alpha)*np.exp(-L/Lstar)/(Lstar*norm_schechter)
+    return ((L/Lstar)**alpha)*np.exp(-L/Lstar)/(Lstar*norm_schechter)
 
 @njit
 def log_schechter(L):
-    return 0.#alpha*np.log(L/Lstar) -L/Lstar - np.log(Lstar) -np.log(norm_schechter)
+    return alpha*np.log(L/Lstar) -L/Lstar - np.log(Lstar) -np.log(norm_schechter)
 
 def redshift_distribution(z):
     return omega.ComovingVolumeElement(z)/((1+z)*norm_z)
