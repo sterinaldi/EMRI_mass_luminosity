@@ -12,7 +12,7 @@ Llow  = 0.0001*Lstar
 Lhigh = 10*Lstar
 mth   = 19
 zmax  = 0.12
-gal_density = 1./10000 #gal/Mpc^3
+gal_density = 1./3. #gal/Mpc^3
 
 # Mass-luminosity relation from Ding et al (2020) – https://arxiv.org/pdf/1910.11875
 # log(M/10^7 Msun) = 0.49 + 0.90 log(L/10^10 Lsun)
@@ -75,29 +75,3 @@ def sample_catalog(n_galaxies = 1, select = False):
         return cat[m<mth]
     else:
         return cat
-
-if __name__ == '__main__':
-
-    from corner import corner
-    from figaro import plot_settings
-    
-    n_evs = 1000
-    ngal  = int(omega.ComovingVolume(zmax)*gal_density)
-    cat   = sample_catalog(ngal)
-    hosts = cat[np.random.randint(ngal, size = n_evs)]
-    
-    np.savetxt(f'simulated_data/catalog_mth_{mth}.txt', cat[cat[:,1]<mth], header = 'L m M ra dec z DL dz')
-    np.savetxt(f'simulated_data/hosts_mth_{mth}.txt', hosts, header = 'L m M ra dec z DL dz')
-    
-    hosts[:,2] = np.log10(hosts[:,2])
-    cat[:,2] = np.log10(cat[:,2])
-    hosts[:,0] = np.log10(hosts[:,0])
-    cat[:,0] = np.log10(cat[:,0])
-    
-    fig = corner(cat[cat[:,1]<mth][:,:-1], labels = ['$\\log\\mathrm{L}/\\mathrm{L}_\\odot$', '$m$','$\\log\\mathrm{M}/\\mathrm{M}_\\odot$', '$\\alpha$', '$\\delta$', '$z$', '$\\mathrm{D_L}\ [\\mathrm{Mpc}]$'])
-    fig.savefig(f'simulated_data/observed_catalog_mth_{mth}.pdf', bbox_inches = 'tight')
-
-    fig = corner(hosts[:,:-1], labels = ['$\\log\\mathrm{L}/\\mathrm{L}_\\odot$', '$m$','$\\log\\mathrm{M}/\\mathrm{M}_\\odot$', '$\\alpha$', '$\\delta$', '$z$', '$\\mathrm{D_L}\ [\\mathrm{Mpc}]$'])
-    fig.savefig(f'simulated_data/potential_hosts_mth_{mth}.pdf', bbox_inches = 'tight')
-    
-    

@@ -22,3 +22,6 @@ The lines correspond to the ecliptic colatitutes -85, -75, ..., 85, respectively
 The columns correspond to the ecliptic longitudes 5, 15, ..., 355, respectively.
 
 The sources are set at a luminosity distance of 20 Mpc, with an average inlcination of delta = pi/6. The mass of the small black hole is fixed at 30 solar masses and the observation time is 2 years. The initial eccentrity is 0.2.
+
+SNR: 1/DL
+Uncertainty: 1/rho

@@ -53,3 +53,4 @@ Issues = "https://github.com/sterinaldi/EMRI_mass_luminosity/issues"
 [project.scripts]
 EMRI-SNR = "masslum._pipelines.SNRcalculator:main"
 EMRI-FM  = "masslum._pipelines.FMcalculator:main"
+EMRI-CAT = "masslum._pipelines.make_catalog:main"
