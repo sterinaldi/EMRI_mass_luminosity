@@ -11,7 +11,7 @@ Lstar = 1.2*(1e10)/(omega.h**2)
 Llow  = 0.0001*Lstar
 Lhigh = 10*Lstar
 mth   = 19
-zmax  = 0.12
+zmax  = 0.5
 gal_density = 1./3. #gal/Mpc^3
 
 # Mass-luminosity relation from Ding et al (2020) – https://arxiv.org/pdf/1910.11875
