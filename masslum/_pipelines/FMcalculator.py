@@ -3,8 +3,8 @@
 # Import packages and functions need
 import numpy as np
 import csv
-import HABwave_more as wave
-import Detection
+import masslum.fisher.HABwave_more as wave
+import masslum.fisher.Detection as Detection
 
 import time
 import matplotlib.pyplot as plt
@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from numpy import pi, sqrt, log10
 from numpy.linalg import inv
 
+from tqdm import tqdm
 
 # Define a year
 yr = 3.1536e7 # in s
@@ -56,7 +57,7 @@ to = 0.3*yr
 delt = 1e-10
 
 # Define the array of the masses considered
-M = np.logspace(5,7,21)
+M = np.logspace(7,8,11)
 
 # Define the arrays of the sky localizations considered
 col = pi*np.linspace(-85,85,18)/180
@@ -77,7 +78,7 @@ scl_LISA = np.zeros((len(col),len(lon)))
 
 # Compute the SNR for different masses at different sky localizations
 # Consider the different masses
-for m in M[19:]:
+for m in tqdm(M, desc = 'Compute FM'):
 	# Compute the differentiation of the waveforms for the mass
 	t, hp_Mp, hc_Mp = wave.HABwave(m*(1+delt),m2,S,e0,D,iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)
 	t, hp_Mm, hc_Mm = wave.HABwave(m*(1-delt),m2,S,e0,D,iota,delta,alpha0,gamma0,eta0,PHI0,f_min,f_max,n_lim,to)

@@ -8,10 +8,10 @@ alpha = -1.07
 Lsun  = 3.8*1e26
 L0    = 3.0128*1e28/Lsun
 Lstar = 1.2*(1e10)/(omega.h**2)
-Llow  = 0.0001*Lstar
-Lhigh = 10*Lstar
+Llow  = 0.00065*Lstar # 10^8 Msun
+Lhigh = 1.41*Lstar # 10^8 Msun
 mth   = 19
-zmax  = 0.5
+zmax  = 0.3
 gal_density = 1./3. #gal/Mpc^3
 
 # Mass-luminosity relation from Ding et al (2020) – https://arxiv.org/pdf/1910.11875
@@ -64,7 +64,7 @@ def selection_function(x):
 def sample_catalog(n_galaxies = 1, select = False):
     L   = rejection_sampler(n_galaxies, schechter_unnorm, [Llow,Lhigh])
     M   = mass_luminosity_relation(L, a_ding, b_ding)
-    z   = rejection_sampler(n_galaxies, redshift_distribution, [0,zmax])
+    z   = rejection_sampler(n_galaxies, redshift_distribution, [0.001,zmax])
     dz  = z*0.05
     DL  = omega.LuminosityDistance(z)
     m   = apparent_magnitude(L, DL)
